@@ -1,0 +1,57 @@
+version: "2"
+
+services:
+
+  front:
+    image: couchbase:5.5.1
+    #image: haproxy
+    hostname: front.poc
+    command: "moxi -vvv -Z usr=admin,pwd=totototo,port_listen=11210,concurrency=1024,wait_queue_timeout=200,connect_timeout=400,connect_max_errors=3,connect_retry_interval=30000,auth_timeout=100,downstream_conn_max=16,downstream_timeout=5000,cycle=200 http://server1:8091/pools/default/bucketsStreaming/mem,http://server2:8091/pools/default/bucketsStreaming/mem,http://server3:8091/pools/default/bucketsStreaming/mem -O /dev/stderr"
+    ports:
+    - 11210:11210
+    networks:
+      front:
+        aliases:
+          - front.poc
+
+  server1:
+    image: couchbase:5.5.1
+    hostname: server1.poc
+    ports:
+    - 11211:11210
+    - 8091:8091
+    cap_add:
+    - SYS_PTRACE
+    security_opt:
+    - seccomp=unconfined
+    networks:
+      front:
+        aliases:
+          - server1.poc
+
+  server2:
+    image: couchbase:5.5.1
+    hostname: server2.poc
+    cap_add:
+    - SYS_PTRACE
+    security_opt:
+    - seccomp=unconfined
+    ports:
+    - 11212:11210
+    networks:
+      front:
+        aliases:
+          - server2.poc
+
+  server3:
+    image: couchbase:5.5.1
+    hostname: server3.poc
+    ports:
+    - 11213:11210
+    networks:
+      front:
+        aliases:
+          - server3.poc
+
+networks:
+  front:
